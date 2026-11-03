@@ -586,6 +586,7 @@ function invitationsSection(p) {
   $('#app').insertAdjacentHTML('beforeend', `<section class="card" id="invitations" data-testid="invitations"><h2>💌 Invitations</h2>
     <p class="hint">Uses what you entered above. Check it here, then change anything inside the invitations app.</p>
     <label class="f" for="invHost">Your name (host)</label><input id="invHost" type="text" maxlength="60" value="${esc(p.hostName || '')}" data-testid="inv-host">
+    <p class="hint small" data-testid="inv-host-hint">Shown to your guests. A first name or nickname is fine.</p>
     <ul class="invsum" data-testid="inv-summary">${row('Event', d.name)}${row('Type', d.type)}${row('When', [d.date, d.time].filter(Boolean).join(' at '))}${row('Venue', d.venue)}${row('Theme', d.theme)}${row('Party', d.kids ? "Kids' party: mocktail coupons only" : 'Adults')}${row('Guests', names.length ? names.length + ': ' + names.slice(0, 6).join(', ') + (names.length > 6 ? '…' : '') : '')}</ul>
     <div class="row mt"><button class="btn" id="invEmbed" data-testid="inv-embed">${p.invOpen ? '↻ Refresh with my latest details' : 'Start invitations here'}</button><button class="btn small alt" id="invTab" data-testid="inv-open">Open in a new tab ↗</button></div>
     <p class="hint small">Guest names are passed to the invitations app on this page only. Email addresses are never put in a link.</p>
