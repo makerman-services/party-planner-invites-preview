@@ -284,12 +284,14 @@ function render() {
   const p = P();
   $('#tabs').hidden = !p || p.fresh;
   document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === S.tab));
+  setPageBg(p && !p.fresh ? p.pageBg : '');
   if (!p || p.fresh) { $('#hdr').innerHTML = ''; return renderSetup(); }
   const f = p.form, t = TYPE(f.type), th = themeOf(f);
   document.documentElement.style.setProperty('--t1', th.colours[0].h); document.documentElement.style.setProperty('--t2', th.colours[1].h);
   const d = f.date ? daysTo(f.date) : null;
   $('#hdr').innerHTML = `<div class="ph"><div class="phl"><span class="em">${th.emoji}</span><div><b data-testid="plan-title">${esc(planName(p))}</b><small>${esc(whenText(f))} · ${people(f).g} guests</small></div></div>${d != null ? `<span class="dd" data-testid="days-to-go">${d > 0 ? d + ' days to go' : d === 0 ? 'Today!' : 'Done'}</span>` : ''}</div>`;
   ({ plan: renderPlan, todo: renderTodo, food: renderFood, day: renderDay, guests: renderGuests })[S.tab]();
+  if (S.tab === 'plan') pageBgPicker(p);
   bindCommon();
 }
 function planName(p) { const f = p.form, t = TYPE(f.type); return f.name || (f.hon ? f.hon + "'s " + t.name.replace(/^Kids' |^Teen |^Adult /, '').replace(/ \(.*\)/, '').toLowerCase() : t.name); }
@@ -547,4 +549,22 @@ $('#brand').onclick = () => { if (P() && P().picks.food) { openPlans(); } };
 if (!S.current || !S.plans[S.current]) { newPlan('kidbday'); save(); }
 render();
 window.PartySorted = { state: () => S, P, budgetPlan, foodPlan, shoppingList, runSheet, tasks, themeOf };
+/* Full-page background. Fixed layer z-index -1 behind everything, pointer-events none; content stays on top. */
+function PAGE_BGS() { return CFG.pageBgs || []; }
+function pageBgOf(id) { return PAGE_BGS().find(x => x.id === id) || null; }
+function setPageBg(id) {
+  const a = pageBgOf(id), bg = $('#pageBg'), on = !!(a && a.src); if (!bg) return;
+  bg.hidden = !on; $('#pageFade').hidden = !on; bg.style.backgroundImage = on ? `url('${a.src}')` : 'none';
+  document.body.classList.toggle('has-pagebg', on);
+  const lab = $('#pageArtLabel'), no = $('#pageArtNotice'), cap = $('#pageCap');
+  lab.hidden = !(on && a.ai); lab.textContent = 'Background: ' + CFG.pageArtLabel;
+  no.hidden = !(on && a.notice); no.textContent = (on && a.notice) || '';
+  cap.hidden = !(on && a.ai); cap.textContent = on ? CFG.pageArtLabel + (a.notice ? ' · ' + a.notice : '') : '';
+}
+function pageBgPicker(p) {
+  if (!PAGE_BGS().length) return; const a = pageBgOf(p.pageBg);
+  $('#app').insertAdjacentHTML('beforeend', `<section class="card" data-testid="page-bg-card"><h2>🖼️ Page background</h2><p class="hint">Photo backgrounds for your planner page. Text and buttons stay on top.</p><select id="pageBgSel" data-testid="page-bg" aria-label="Page background"><option value="">Plain</option>${PAGE_BGS().map(x => `<option value="${x.id}" ${p.pageBg === x.id ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select>${a && a.notice ? `<p class="hint" data-testid="page-bg-notice">${esc(a.notice)}</p>` : ''}${a && a.ai ? `<p class="hint small" data-testid="page-bg-label">${esc(CFG.pageArtLabel)}</p>` : ''}</section>`);
+  $('#pageBgSel').onchange = e => { p.pageBg = e.target.value; save(); render(); };
+}
+
 })();

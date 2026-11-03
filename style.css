@@ -69,3 +69,14 @@ details.game{border:1px solid var(--line);border-radius:14px;padding:10px 12px;m
 .foot{text-align:center;color:var(--soft);font-size:12px;padding:10px 20px 24px;max-width:720px;margin:0 auto}.foot span{opacity:.7}
 .print-only{display:none}
 @media print{body{padding:0;background:#fff;font-size:11.5pt}.top,#hdr,main,.tabs,.foot,.toast,.modal{display:none!important}.print-only{display:block;color:#000}.print-only h1{font-size:22pt}.print-only h2{font-size:14pt;border-bottom:1px solid #999;margin-top:18px;page-break-after:avoid}.print-only h3{font-size:11.5pt;display:block}.print-only table{border-collapse:collapse;width:100%}.print-only td:first-child{white-space:nowrap}.print-only td{border-bottom:1px solid #ddd;padding:3px 6px;vertical-align:top}.print-only ul.ck{list-style:none;padding-left:0;columns:2}.print-only pre{white-space:pre-wrap;font:inherit;border:1px dashed #999;padding:8px}.pfoot{margin-top:20px;color:#555;font-size:9pt}}
+
+/* Full-page background (preview) */
+.page-bg{position:fixed;inset:0;z-index:-1;pointer-events:none;background:var(--bg) center/cover no-repeat}
+.page-fade{position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(ellipse at center,rgba(251,247,242,.8) 0,rgba(251,247,242,.5) 70%,rgba(251,247,242,.3) 100%)}
+.page-bg[hidden],.page-fade[hidden],.page-cap[hidden]{display:none}
+body.has-pagebg{background:transparent}
+html:has(body.has-pagebg){background:var(--bg)}
+body.has-pagebg main{background:rgba(251,247,242,.9);border-radius:20px;margin-top:8px}
+body.has-pagebg .foot{background:rgba(255,255,255,.94);border-radius:14px;margin-bottom:12px}.has-pagebg .foot span{opacity:1}
+.page-cap{position:absolute;left:0;right:0;bottom:100%;pointer-events:none;text-align:center;font-size:11.5px;line-height:1.3;padding:3px 8px;background:rgba(255,255,255,.95);color:#3F3A4F;border-top:1px solid var(--line)}
+@media print{.page-bg,.page-fade,.page-cap{display:none!important}}

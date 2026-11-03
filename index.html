@@ -11,6 +11,7 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<div id="pageBg" class="page-bg" aria-hidden="true" hidden></div><div class="page-fade" id="pageFade" aria-hidden="true" hidden></div>
 <div style="background:#FFF1D4;color:#8A5B00;text-align:center;font:700 12.5px/1.4 sans-serif;padding:5px 8px" data-testid="preview-banner">Preview only: test copy of My Party. Not for sale.</div>
 <header class="top">
   <button class="brand" id="brand" aria-label="My plans"><img src="icon.svg" alt="" width="34" height="34"><div><strong>My Party</strong><span>by Makerman Services</span></div></button>
@@ -18,6 +19,7 @@
 <div id="hdr"></div>
 <main id="app"></main>
 <nav class="tabs" id="tabs" hidden>
+  <div id="pageCap" class="page-cap" data-testid="page-cap" aria-hidden="true" hidden></div>
   <button data-tab="plan" data-testid="tab-plan"><span class="ti">💰</span>Plan</button>
   <button data-tab="todo" data-testid="tab-todo"><span class="ti">✅</span>To-do</button>
   <button data-tab="food" data-testid="tab-food"><span class="ti">🍽️</span>Food</button>
@@ -27,7 +29,7 @@
 <div id="modal" class="modal" hidden><div class="sheet" role="dialog" aria-modal="true"><button class="x" data-close aria-label="Close">×</button><div id="modalBody"></div></div></div>
 <div id="toast" class="toast" hidden></div>
 <div id="print" class="print-only"></div>
-<footer class="foot">Ideas and estimates only. Check prices, venue and council rules, and allergens. Your plans stay on this device.<br><span>Written with Grok for Makerman Services.</span><br><span>© Makerman Services</span></footer>
+<footer class="foot">Ideas and estimates only. Check prices, venue and council rules, and allergens. Your plans stay on this device.<br><span>Written with Grok for Makerman Services.</span><br><span>© Makerman Services</span><br><small id="pageArtLabel" data-testid="page-art-label" hidden></small><br><small id="pageArtNotice" data-testid="page-art-notice" hidden></small></footer>
 <script src="config.js"></script>
 <script src="content1.js"></script>
 <script src="content2.js"></script>
