@@ -558,13 +558,13 @@ function setPageBg(id) {
   bg.hidden = !on; $('#pageFade').hidden = !on; bg.style.backgroundImage = on ? `url('${a.src}')` : 'none';
   document.body.classList.toggle('has-pagebg', on);
   const lab = $('#pageArtLabel'), no = $('#pageArtNotice'), cap = $('#pageCap');
-  lab.hidden = !(on && a.ai); lab.textContent = 'Background: ' + CFG.pageArtLabel;
+  lab.hidden = !(on && a.ai); lab.textContent = 'Background: ' + ((a && a.label) || CFG.pageArtLabel);
   no.hidden = !(on && a.notice); no.textContent = (on && a.notice) || '';
-  cap.hidden = !(on && a.ai); cap.textContent = on ? CFG.pageArtLabel + (a.notice ? ' · ' + a.notice : '') : '';
+  cap.hidden = !(on && a.ai); cap.textContent = on ? (a.label || CFG.pageArtLabel) + (a.notice ? ' · ' + a.notice : '') : '';
 }
 function pageBgPicker(p) {
   if (!PAGE_BGS().length) return; const a = pageBgOf(p.pageBg);
-  $('#app').insertAdjacentHTML('beforeend', `<section class="card" data-testid="page-bg-card"><h2>🖼️ Page background</h2><p class="hint">Photo backgrounds for your planner page. Text and buttons stay on top.</p><select id="pageBgSel" data-testid="page-bg" aria-label="Page background"><option value="">Plain</option>${PAGE_BGS().map(x => `<option value="${x.id}" ${p.pageBg === x.id ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select>${a && a.notice ? `<p class="hint" data-testid="page-bg-notice">${esc(a.notice)}</p>` : ''}${a && a.ai ? `<p class="hint small" data-testid="page-bg-label">${esc(CFG.pageArtLabel)}</p>` : ''}</section>`);
+  $('#app').insertAdjacentHTML('beforeend', `<section class="card" data-testid="page-bg-card"><h2>🖼️ Page background</h2><p class="hint">Photo backgrounds for your planner page. Text and buttons stay on top.</p><select id="pageBgSel" data-testid="page-bg" aria-label="Page background"><option value="">Plain</option>${PAGE_BGS().map(x => `<option value="${x.id}" ${p.pageBg === x.id ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select>${a && a.notice ? `<p class="hint" data-testid="page-bg-notice">${esc(a.notice)}</p>` : ''}${a && a.ai ? `<p class="hint small" data-testid="page-bg-label">${esc(a.label || CFG.pageArtLabel)}</p>` : ''}</section>`);
   $('#pageBgSel').onchange = e => { p.pageBg = e.target.value; save(); render(); };
 }
 

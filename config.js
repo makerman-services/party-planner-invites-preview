@@ -7,7 +7,9 @@ window.PP_CONFIG = { aiEndpoint: '', appName: 'My Party', brand: 'by Makerman Se
      Swap or add art here. notice = extra line shown wherever that page is used. Empty list = no picker. */
   pageArtLabel: 'AI-generated art, made with Grok Imagine',
   pageBgs: [
-    { id: 'kids', name: "Kids' party: clown, magician & party table (photo)", src: 'img/kids-page-party-v2-faded.jpg', ai: true, notice: 'Illustration only. Entertainers are booked by the host.' },
-    { id: 'adult', name: 'Party tables (photo)', src: 'img/adult-page-elegant-faded.jpg', ai: true },
+    /* Canva AI paid art (Legal pass /workspace/ops/legal/canva-paid-art-pass-2026-11-03.md, sources in ART-SOURCES.md). label overrides pageArtLabel. */
+    { id: 'kids', name: "Kids' party table (photo)", src: 'img/canva-kids-page.webp', ai: true, label: 'Made with Canva AI' },
+    { id: 'adult', name: 'Party tables (photo)', src: 'img/canva-adult-page.webp', ai: true, label: 'Made with Canva AI' },
+    /* Grok Imagine (preview only; Mal 17:37: Imagine stays in posts and previews, remove before sale) */
     { id: 'seniors', name: 'Classic tea party (photo)', src: 'img/seniors-page-classic-faded.jpg', ai: true }
   ] };
