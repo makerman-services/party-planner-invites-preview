@@ -84,6 +84,3 @@ body.has-pagebg .foot{background:rgba(255,255,255,.94);border-radius:14px;margin
 .invframe{width:100%;height:1150px;border:1px solid var(--line);border-radius:14px;margin-top:10px;background:#fff}
 @media print{#invitations{display:none!important}}
 
-/* Preview: muted app video (audio removed). Caption sits below the video, outside it, so no player UI can cover it; full frame shown (no crop) so the Grok watermark stays visible. */
-.app-video{max-width:720px;margin:16px auto 8px;padding:0 16px}.app-video video{display:block;width:100%;height:auto;aspect-ratio:4/3;object-fit:contain;border-radius:14px;background:#fff}.app-video figcaption{margin-top:6px;text-align:center;font-size:13px;font-weight:700;color:#2B1B3D;background:#fff;border-radius:8px;padding:4px 8px}
-@media print{.app-video{display:none!important}}
