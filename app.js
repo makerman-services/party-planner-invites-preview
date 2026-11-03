@@ -292,6 +292,7 @@ function render() {
   $('#hdr').innerHTML = `<div class="ph"><div class="phl"><span class="em">${th.emoji}</span><div><b data-testid="plan-title">${esc(planName(p))}</b><small>${esc(whenText(f))} · ${people(f).g} guests</small></div></div>${d != null ? `<span class="dd" data-testid="days-to-go">${d > 0 ? d + ' days to go' : d === 0 ? 'Today!' : 'Done'}</span>` : ''}</div>`;
   ({ plan: renderPlan, todo: renderTodo, food: renderFood, day: renderDay, guests: renderGuests })[S.tab]();
   if (S.tab === 'plan') pageBgPicker(p);
+  invitationsSection(p);
   bindCommon();
 }
 function planName(p) { const f = p.form, t = TYPE(f.type); return f.name || (f.hon ? f.hon + "'s " + t.name.replace(/^Kids' |^Teen |^Adult /, '').replace(/ \(.*\)/, '').toLowerCase() : t.name); }
@@ -466,7 +467,7 @@ function renderGuests() {
   inv += (p.picks.invites || []).map((t, i) => `<div class="invite"><pre data-testid="invite-${i}">${esc(t)}</pre><button class="btn small alt" data-copyinv="${i}">📋 Copy</button></div>`).join('');
   const invApp = CFG.inviteAppUrl ? `<section class="card" data-testid="invite-app-card"><h2>💌 Send digital invites</h2><p class="hint">Email invitations with RSVP links and bar drink coupons, from your own Gmail. Opens our separate invitations app.</p><button class="btn" id="openInviteApp" data-testid="open-invite-app">Open the invitations app ↗</button></section>` : '';
   $('#app').innerHTML = invApp + sec('Guest list & RSVPs', 'guests', html) + sec('Invite wording', 'invites', inv, { regen: 1, ai: 1 });
-  const oia = $('#openInviteApp'); if (oia) oia.onclick = () => window.open(CFG.inviteAppUrl, '_blank', 'noopener');
+  const oia = $('#openInviteApp'); if (oia) oia.onclick = () => window.open(inviteUrl(p), '_blank', 'noopener'); // event details only (no guest list, no emails)
   const addG = () => { const raw = $('#gn').value.trim(); if (!raw) return; raw.split(/\n|;/).map(s => s.trim()).filter(Boolean).forEach(n => g.push({ id: uid(), name: n, adults: Math.max(0, +$('#ga').value || 0), kids: Math.max(0, +$('#gk').value || 0), rsvp: 'invited', diet: '' })); save(); render(); setTimeout(() => $('#gn') && $('#gn').focus(), 0); };
   $('#addGuest').onclick = addG; $('#gn').onkeydown = e => { if (e.key === 'Enter') addG(); };
   $('#gn').onpaste = e => { const t = (e.clipboardData || {}).getData ? e.clipboardData.getData('text') : ''; if (t && t.includes('\n')) { e.preventDefault(); $('#gn').value = t; addG(); } };
@@ -548,7 +549,7 @@ document.title = CFG.appName + ' ' + CFG.brand + ': Interactive Party Planner'; 
 $('#brand').onclick = () => { if (P() && P().picks.food) { openPlans(); } };
 if (!S.current || !S.plans[S.current]) { newPlan('kidbday'); save(); }
 render();
-window.PartySorted = { state: () => S, P, budgetPlan, foodPlan, shoppingList, runSheet, tasks, themeOf };
+window.PartySorted = { state: () => S, P, budgetPlan, foodPlan, shoppingList, runSheet, tasks, themeOf, invitePrefill: p => invitePrefill(p) };
 /* Full-page background. Fixed layer z-index -1 behind everything, pointer-events none; content stays on top. */
 function PAGE_BGS() { return CFG.pageBgs || []; }
 function pageBgOf(id) { return PAGE_BGS().find(x => x.id === id) || null; }
@@ -567,4 +568,37 @@ function pageBgPicker(p) {
   $('#pageBgSel').onchange = e => { p.pageBg = e.target.value; save(); render(); };
 }
 
+
+/* Invitations at the bottom of every tab: uses what the host entered above. Event details go in the URL hash (never sent to a
+   server, no guest emails); guest NAMES go only by postMessage to the embedded invitations app. Everything stays editable there. */
+function addMins(hm, mins) { const [h, m] = String(hm || '').split(':').map(Number); if (isNaN(h)) return ''; const t = ((h * 60 + (m || 0) + Math.round(mins)) % 1440 + 1440) % 1440; return String(Math.floor(t / 60)).padStart(2, '0') + ':' + String(t % 60).padStart(2, '0'); }
+function invitePrefill(p) {
+  const f = p.form, t = TYPE(f.type), th = themeOf(f), kids = ['kidbday', 'teenbday'].includes(f.type);
+  return { v: 1, pid: p.id, name: planName(p), type: t.name, host: p.hostName || '', date: f.date || '', time: f.time || '', endTime: f.time && f.hours ? addMins(f.time, f.hours * 60) : '', venue: (PP.VENUES[f.venue] || {}).name || '', theme: th.name, kids, child: kids ? (f.hon || '') : '', age: kids ? (f.age || '') : '', alcohol: !kids && alcOn(f) };
+}
+function b64url(s) { return btoa(unescape(encodeURIComponent(s))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
+function inviteUrl(p) { return CFG.inviteAppUrl + '#prefill=' + b64url(JSON.stringify(invitePrefill(p))); }
+var invFrameFor = null; // eslint-disable-line no-var (used during the first render)
+function invitationsSection(p) {
+  if (!CFG.inviteAppUrl || !p || p.fresh) return;
+  const d = invitePrefill(p), names = (p.guests || []).map(g => g.name).filter(Boolean);
+  const row = (k, v) => `<li><b>${k}:</b> ${esc(v || 'not set yet')}</li>`;
+  $('#app').insertAdjacentHTML('beforeend', `<section class="card" id="invitations" data-testid="invitations"><h2>💌 Invitations</h2>
+    <p class="hint">Uses what you entered above. Check it here, then change anything inside the invitations app.</p>
+    <label class="f" for="invHost">Your name (host)</label><input id="invHost" type="text" maxlength="60" value="${esc(p.hostName || '')}" data-testid="inv-host">
+    <ul class="invsum" data-testid="inv-summary">${row('Event', d.name)}${row('Type', d.type)}${row('When', [d.date, d.time].filter(Boolean).join(' at '))}${row('Venue', d.venue)}${row('Theme', d.theme)}${row('Party', d.kids ? "Kids' party: mocktail coupons only" : 'Adults')}${row('Guests', names.length ? names.length + ': ' + names.slice(0, 6).join(', ') + (names.length > 6 ? '…' : '') : '')}</ul>
+    <div class="row mt"><button class="btn" id="invEmbed" data-testid="inv-embed">${p.invOpen ? '↻ Refresh with my latest details' : 'Start invitations here'}</button><button class="btn small alt" id="invTab" data-testid="inv-open">Open in a new tab ↗</button></div>
+    <p class="hint small">Guest names are passed to the invitations app on this page only. Email addresses are never put in a link.</p>
+    <div id="invWrap" data-testid="inv-wrap"></div></section>`);
+  const h = $('#invHost'); h.onchange = () => { p.hostName = h.value.trim(); save(); render(); };
+  $('#invTab').onclick = () => window.open(inviteUrl(p), '_blank', 'noopener');
+  const show = () => { const w = $('#invWrap'), fr = document.createElement('iframe'); fr.title = 'Invitations'; fr.className = 'invframe'; fr.setAttribute('data-testid', 'inv-frame'); fr.src = inviteUrl(p); w.innerHTML = ''; w.appendChild(fr); invFrameFor = fr; };
+  $('#invEmbed').onclick = () => { p.invOpen = true; save(); render(); setTimeout(() => { show(); const s = $('#invitations'); if (s) s.scrollIntoView({ block: 'start' }); }, 0); };
+  if (p.invOpen) show();
+}
+window.addEventListener('message', e => {
+  const p = P(); if (!p || !invFrameFor || e.source !== invFrameFor.contentWindow || !CFG.inviteAppUrl) return;
+  const origin = new URL(CFG.inviteAppUrl, location.href).origin; if (e.origin !== origin) return;
+  if (e.data && e.data.type === 'ie-ready') e.source.postMessage({ type: 'mp-prefill', event: invitePrefill(p), guests: (p.guests || []).map(g => g.name).filter(Boolean) }, origin);
+});
 })();
